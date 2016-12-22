@@ -32,6 +32,14 @@ yum --installroot=$ROOTFS --nogpgcheck -y groupinstall core
 yum --installroot=$ROOTFS --nogpgcheck -y install openssh-server grub2 acpid tuned kernel deltarpm epel-release
 yum --installroot=$ROOTFS -C -y remove NetworkManager --setopt="clean_requirements_on_remove=1"
 
+yum --installroot=$ROOTFS --nogpgcheck -y update
+yum --installroot=$ROOTFS --nogpgcheck -y install pcp pcp-webapi wget htop python-pip
+# Install some dependencies of both java 7 and 8.
+yum --installroot=$ROOTFS --nogpgcheck -y install \
+copy-jdk-configs javapackages-tools python-javapackages python-lxml tzdata-java lksctp-tools libxslt
+
+
+
 # Create homedir for root
 cp -a /etc/skel/.bash* ${ROOTFS}/root
 
@@ -44,6 +52,8 @@ touch ${ROOTFS}/etc/resolv.conf
 cat > ${ROOTFS}/etc/sysconfig/network << END
 NETWORKING=yes
 NOZEROCONF=yes
+NETWORKING_IPV6=yes
+DHCPV6C=yes
 END
 cat > ${ROOTFS}/etc/sysconfig/network-scripts/ifcfg-eth0  << END
 DEVICE=eth0
@@ -89,6 +99,19 @@ chroot ${ROOTFS} yum --nogpgcheck -y install cloud-init cloud-utils-growpart gdi
 chroot ${ROOTFS} systemctl enable sshd.service
 chroot ${ROOTFS} systemctl enable cloud-init.service
 chroot ${ROOTFS} systemctl mask tmp.mount
+
+
+
+
+# Enable pcp services on boot.
+chroot ${ROOTFS} systemctl enable pmcd pmwebd
+# Disable firewall
+chroot ${ROOTFS} systemctl disable firewalld
+# Allow 'sudo' to be used without a TTY. This has no downside.
+sed -i -e 's/Defaults    requiretty.*/ #Defaults    requiretty/g' ${ROOTFS}/etc/sudoers
+
+
+
 
 # Configure cloud-init
 cat > ${ROOTFS}/etc/cloud/cloud.cfg << END
