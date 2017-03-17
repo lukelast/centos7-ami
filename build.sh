@@ -242,6 +242,8 @@ sed -i -e 's/^\(SELINUX=\).*/\1disabled/' ${ROOTFS}/etc/selinux/config
 
 # Remove EPEL
 yum --installroot=$ROOTFS -C -y remove epel-release --setopt="clean_requirements_on_remove=1"
+yum --installroot=$ROOTFS clean all
+yum --installroot=$ROOTFS makecache
 
 # We're done!
 for d in $BINDMNTS ; do
