@@ -26,18 +26,18 @@ mount ${DEVICE}2 $ROOTFS
 ### Basic CentOS Install
 rpm --root=$ROOTFS --initdb
 rpm --root=$ROOTFS -ivh \
-  http://mirror.bytemark.co.uk/centos/7.3.1611/os/x86_64/Packages/centos-release-7-3.1611.el7.centos.x86_64.rpm
+  http://mirror.centos.org/centos/7/os/x86_64/Packages/centos-release-7-3.1611.el7.centos.x86_64.rpm
+
 # Install necessary packages
 yum --installroot=$ROOTFS --nogpgcheck -y groupinstall core
+yum --installroot=$ROOTFS --nogpgcheck -y update
 yum --installroot=$ROOTFS --nogpgcheck -y install openssh-server grub2 acpid tuned kernel deltarpm epel-release
 yum --installroot=$ROOTFS -C -y remove NetworkManager --setopt="clean_requirements_on_remove=1"
-
-yum --installroot=$ROOTFS --nogpgcheck -y update
-yum --installroot=$ROOTFS --nogpgcheck -y install pcp pcp-webapi wget htop python-pip
+yum --installroot=$ROOTFS --nogpgcheck -y install \
+  pcp pcp-webapi wget htop python-pip git tcpdump vim-enhanced
 # Install some dependencies of both java 7 and 8.
 yum --installroot=$ROOTFS --nogpgcheck -y install \
-copy-jdk-configs javapackages-tools python-javapackages python-lxml tzdata-java lksctp-tools libxslt
-
+  copy-jdk-configs javapackages-tools python-javapackages python-lxml tzdata-java lksctp-tools libxslt
 
 
 # Create homedir for root
