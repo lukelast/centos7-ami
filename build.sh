@@ -44,7 +44,7 @@ yum --installroot=$ROOTFS -C -y remove NetworkManager --setopt="clean_requiremen
 # Install pcp and other useful apps.
 # Install some dependencies of both java 7 and 8.
 yum --installroot=$ROOTFS --nogpgcheck -y install \
-  pcp pcp-webapi wget htop python-pip git tcpdump vim-enhanced \
+  pcp pcp-webapi wget htop python-pip git tcpdump vim-enhanced nfs-utils \
   copy-jdk-configs javapackages-tools python-javapackages python-lxml tzdata-java lksctp-tools libxslt
 
 
