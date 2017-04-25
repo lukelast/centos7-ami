@@ -41,9 +41,10 @@ yum --installroot=$ROOTFS --nogpgcheck -y groupinstall core
 yum --installroot=$ROOTFS --nogpgcheck -y update
 yum --installroot=$ROOTFS --nogpgcheck -y install openssh-server grub2 acpid tuned kernel kernel-devel deltarpm epel-release
 yum --installroot=$ROOTFS -C -y remove NetworkManager --setopt="clean_requirements_on_remove=1"
+# Install pcp and other useful apps.
+# Install some dependencies of both java 7 and 8.
 yum --installroot=$ROOTFS --nogpgcheck -y install \
   pcp pcp-webapi wget htop python-pip git tcpdump vim-enhanced \
-# Install some dependencies of both java 7 and 8.
   copy-jdk-configs javapackages-tools python-javapackages python-lxml tzdata-java lksctp-tools libxslt
 
 
