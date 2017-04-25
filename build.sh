@@ -25,6 +25,9 @@ mount ${DEVICE}2 $ROOTFS
 
 ### Basic CentOS Install
 rpm --root=$ROOTFS --initdb
+# Required for Scientific Linux
+#mkdir -p $ROOTFS/etc/yum/vars
+#echo "7rolling" > $ROOTFS/etc/yum/vars/slreleasever
 rpm --root=$ROOTFS -ivh \
   http://mirror.centos.org/centos/7/os/x86_64/Packages/centos-release-7-3.1611.el7.centos.x86_64.rpm
   #http://ftp.scientificlinux.org/linux/scientific/7rolling/x86_64/os/Packages/sl-release-7.3-4.sl7.x86_64.rpm
