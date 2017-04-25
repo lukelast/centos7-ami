@@ -10,6 +10,10 @@ ENA_VER=1.1.3
 ENA_COMMIT=3ac3e0b
 TMPDIR=/tmp
 
+# Host requirements
+yum -y install git patch
+
+
 cat | parted ${DEVICE} << END
 mktable gpt
 mkpart primary ext2 1 2
@@ -35,12 +39,11 @@ rpm --root=$ROOTFS -ivh \
 # Install necessary packages
 yum --installroot=$ROOTFS --nogpgcheck -y groupinstall core
 yum --installroot=$ROOTFS --nogpgcheck -y update
-yum --installroot=$ROOTFS --nogpgcheck -y install openssh-server grub2 acpid tuned kernel deltarpm epel-release
+yum --installroot=$ROOTFS --nogpgcheck -y install openssh-server grub2 acpid tuned kernel kernel-devel deltarpm epel-release
 yum --installroot=$ROOTFS -C -y remove NetworkManager --setopt="clean_requirements_on_remove=1"
 yum --installroot=$ROOTFS --nogpgcheck -y install \
-  pcp pcp-webapi wget htop python-pip git tcpdump vim-enhanced
+  pcp pcp-webapi wget htop python-pip git tcpdump vim-enhanced \
 # Install some dependencies of both java 7 and 8.
-yum --installroot=$ROOTFS --nogpgcheck -y install \
   copy-jdk-configs javapackages-tools python-javapackages python-lxml tzdata-java lksctp-tools libxslt
 
 
@@ -192,12 +195,12 @@ END
 
 # Add additional AWS drivers
 KVER=$(chroot $ROOTFS rpm -q kernel | sed -e 's/^kernel-//')
+
 # Enable sr-iov
 yum --installroot=$ROOTFS --nogpgcheck -y install dkms make
 curl -L http://sourceforge.net/projects/e1000/files/ixgbevf%20stable/${IXGBEVF_VER}/ixgbevf-${IXGBEVF_VER}.tar.gz/download > /tmp/ixgbevf.tar.gz
 tar zxf /tmp/ixgbevf.tar.gz -C ${ROOTFS}/usr/src
 # Newer drivers are missing InterruptThrottleRate - patch the old one instead
-yum -y install patch
 curl -L https://sourceforge.net/p/e1000/bugs/_discuss/thread/a5c4e75f/837d/attachment/ixgbevf-3.2.2_rhel73.patch |
   patch -p1 -d ${ROOTFS}/usr/src/ixgbevf-${IXGBEVF_VER}
 cat > ${ROOTFS}/usr/src/ixgbevf-${IXGBEVF_VER}/dkms.conf << END
@@ -215,9 +218,9 @@ chroot $ROOTFS dkms add -m ixgbevf -v ${IXGBEVF_VER}
 chroot $ROOTFS dkms build -m ixgbevf -v ${IXGBEVF_VER} -k $KVER
 chroot $ROOTFS dkms install -m ixgbevf -v ${IXGBEVF_VER} -k $KVER
 echo "options ixgbevf InterruptThrottleRate=1,1,1,1,1,1,1,1" > ${ROOTFS}/etc/modprobe.d/ixgbevf.conf
+
 # Enable Amazon ENA
 # Create an archive file locally from git first
-yum -y install git patch
 mkdir -p ${TMPDIR}/ena
 git clone https://github.com/amzn/amzn-drivers.git ${TMPDIR}/ena
 cd ${TMPDIR}/ena
