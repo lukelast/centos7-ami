@@ -27,6 +27,7 @@ mount ${DEVICE}2 $ROOTFS
 rpm --root=$ROOTFS --initdb
 rpm --root=$ROOTFS -ivh \
   http://mirror.centos.org/centos/7/os/x86_64/Packages/centos-release-7-3.1611.el7.centos.x86_64.rpm
+  #http://ftp.scientificlinux.org/linux/scientific/7rolling/x86_64/os/Packages/sl-release-7.3-4.sl7.x86_64.rpm
 
 # Install necessary packages
 yum --installroot=$ROOTFS --nogpgcheck -y groupinstall core
@@ -62,7 +63,6 @@ BOOTPROTO=dhcp
 END
 
 cp /usr/share/zoneinfo/UTC ${ROOTFS}/etc/localtime
-
 echo 'ZONE="UTC"' > ${ROOTFS}/etc/sysconfig/clock
 
 # fstab
@@ -101,15 +101,12 @@ chroot ${ROOTFS} systemctl enable cloud-init.service
 chroot ${ROOTFS} systemctl mask tmp.mount
 
 
-
-
 # Enable pcp services on boot.
 chroot ${ROOTFS} systemctl enable pmcd pmwebd
 # Disable firewall
 chroot ${ROOTFS} systemctl disable firewalld
 # Allow 'sudo' to be used without a TTY. This has no downside.
 sed -i -e 's/Defaults    requiretty.*/ #Defaults    requiretty/g' ${ROOTFS}/etc/sudoers
-
 
 
 
@@ -254,5 +251,12 @@ sync
 umount ${ROOTFS}
 
 # Snapshot the volume then create the AMI with:
-# aws ec2 register-image --name 'CentOS-7.0-test' --description 'Unofficial CentOS7 + cloud-init' --virtualization-type hvm --root-device-name /dev/sda1 --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs": { "SnapshotId": "snap-7f042d5f", "VolumeSize":5,  "DeleteOnTermination": true, "VolumeType": "gp2"}}, { "DeviceName":"/dev/xvdb","VirtualName":"ephemeral0"}, { "DeviceName":"/dev/xvdc","VirtualName":"ephemeral1"}]' --architecture x86_64 --sriov-net-support simple --ena-support
-
+# aws ec2 register-image \
+#--name 'CentOS-7.0-test' \
+#--description 'Unofficial CentOS7 + cloud-init' \
+#--virtualization-type hvm \
+#--architecture x86_64 \
+#--sriov-net-support simple \
+#--ena-support \
+#--root-device-name /dev/sda1 \
+#--block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs": { "SnapshotId": "snap-7f042d5f", "VolumeSize":4,  "DeleteOnTermination": true, "VolumeType": "gp2"}}, { "DeviceName":"/dev/xvdb","VirtualName":"ephemeral0"}, { "DeviceName":"/dev/xvdc","VirtualName":"ephemeral1"}]'
